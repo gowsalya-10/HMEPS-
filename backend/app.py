@@ -22,3 +22,5 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+from prescription_safety.routes.prescription_routes import prescription_bp
+app.register_blueprint(prescription_bp, url_prefix='/api/prescriptions')
