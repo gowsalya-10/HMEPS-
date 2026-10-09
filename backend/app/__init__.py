@@ -1,8 +1,14 @@
+import os
+import sys
 from flask import Flask, jsonify
 from flask_cors import CORS
 
 from app.config import Config
 from app.database import initialize_database, seed_demo_data
+
+# Ensure parent directory is in sys.path so routes.py can be imported
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import routes
 
 
 def create_app():
@@ -28,9 +34,10 @@ def create_app():
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
     app.register_blueprint(reports_bp, url_prefix="/api/reports")
     app.register_blueprint(monitoring_bp, url_prefix="/api")
+    app.register_blueprint(routes.bp, url_prefix="/api")
 
     @app.get("/")
     def api_root():
-        return jsonify({"message": "HMEPS Module 3 API is running"})
+        return jsonify({"message": "HMEPS System API is running"})
 
     return app

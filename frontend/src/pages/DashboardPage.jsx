@@ -1,18 +1,36 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Activity, FileText, ShieldAlert, Stethoscope, Users } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Activity,
+  AlertTriangle,
+  Calendar,
+  ClipboardList,
+  FileText,
+  Heart,
+  Plus,
+  ShieldCheck,
+  Stethoscope,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import api from '../services/api';
 
-const cardConfig = [
-  { key: 'total_patients', label: 'Total Patients', icon: Users, bg: 'bg-blue-100 text-blue-700' },
-  { key: 'total_doctors', label: 'Total Doctors', icon: Stethoscope, bg: 'bg-cyan-100 text-cyan-700' },
-  { key: 'total_nurses', label: 'Total Nurses', icon: ShieldAlert, bg: 'bg-emerald-100 text-emerald-700' },
-  { key: 'total_pharmacists', label: 'Total Pharmacists', icon: Activity, bg: 'bg-violet-100 text-violet-700' },
-  { key: 'total_prescriptions', label: 'Total Prescriptions', icon: FileText, bg: 'bg-amber-100 text-amber-700' },
-  { key: 'active_safety_alerts', label: 'Active Safety Alerts', icon: AlertTriangle, bg: 'bg-rose-100 text-rose-700' },
-  { key: 'critical_alerts', label: 'Critical Alerts', icon: AlertTriangle, bg: 'bg-red-200 text-red-700' },
-  { key: 'medical_errors_detected', label: 'Medical Errors Detected', icon: Activity, bg: 'bg-slate-200 text-slate-700' },
-];
+const COLORS = ['#0d9488', '#0284c7', '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b'];
 
 export default function DashboardPage() {
   const [data, setData] = useState(null);
@@ -33,108 +51,188 @@ export default function DashboardPage() {
     loadDashboard();
   }, []);
 
-  if (loading) return <div className="rounded-2xl bg-white p-8 text-center shadow-sm">Loading dashboard...</div>;
-  if (error) return <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-red-700">{error}</div>;
-  if (!data) return <div className="rounded-2xl bg-white p-8 text-center shadow-sm">No data available.</div>;
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center rounded-2xl bg-white p-8 shadow-sm">
+        <div className="flex items-center gap-3 text-slate-500 font-medium">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
+          Loading clinical dashboard...
+        </div>
+      </div>
+    );
+  }
 
-  const summary = data.summary;
-  const chartData = data.charts;
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700 font-medium">
+        {error}
+      </div>
+    );
+  }
+
+  const summary = data?.summary || {};
+  const charts = data?.charts || {};
+
+  const kpis = [
+    { label: 'Total Patients', value: summary.total_patients || 0, icon: Users, color: 'text-teal-600', bg: 'bg-teal-50 border-teal-200' },
+    { label: 'Total Encounters', value: summary.total_encounters || 0, icon: Stethoscope, color: 'text-sky-600', bg: 'bg-sky-50 border-sky-200' },
+    { label: 'Vital Signs Records', value: summary.total_vitals || 0, icon: Heart, color: 'text-rose-600', bg: 'bg-rose-50 border-rose-200' },
+    { label: 'Lab Results', value: summary.total_labs || 0, icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-200' },
+    { label: 'Diagnosed Conditions', value: summary.total_conditions || 0, icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
+    { label: 'Appointments', value: summary.total_appointments || 0, icon: Calendar, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
+    { label: 'Active Meds', value: summary.total_medications || 0, icon: ShieldCheck, color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200' },
+    { label: 'Known Allergies', value: summary.total_allergies || 0, icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      {/* Header Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-teal-950 p-6 text-white shadow-lg">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">Overview</p>
-          <h3 className="text-3xl font-bold text-slate-900">Administration Dashboard</h3>
+          <span className="inline-block rounded-full bg-teal-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-teal-300 mb-2">
+            Clinical Information System
+          </span>
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Executive Healthcare Dashboard</h2>
+          <p className="mt-1 text-xs text-slate-300">
+            Real-time telemetry and clinical data integrated from Synthea MongoDB records.
+          </p>
         </div>
-        <div className="rounded-xl bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
-          Error Detection Rate: {summary.error_detection_rate}%
+        <div className="flex items-center gap-3">
+          <Link
+            to="/patients/new"
+            className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-teal-500 shadow-md shadow-teal-950/40 transition"
+          >
+            <Plus className="h-4 w-4" />
+            New Patient
+          </Link>
+          <Link
+            to="/patients"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-700 transition"
+          >
+            Patient Registry
+          </Link>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {cardConfig.map(({ key, label, icon: Icon, bg }) => (
-          <div key={key} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      {/* KPI Cards Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {kpis.map(({ label, value, icon: Icon, color, bg }) => (
+          <div key={label} className={`rounded-2xl border ${bg} p-5 bg-white shadow-sm transition hover:shadow-md`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">{label}</p>
-                <p className="mt-3 text-3xl font-bold text-slate-900">{summary[key]}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</p>
+                <p className="mt-2 text-2xl font-bold text-slate-900 tracking-tight">{value.toLocaleString()}</p>
               </div>
-              <div className={`rounded-xl p-3 ${bg}`}>
-                <Icon className="h-5 w-5" />
+              <div className={`rounded-xl p-3 bg-white shadow-sm border ${color}`}>
+                <Icon className="h-6 w-6" />
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h4 className="mb-4 text-lg font-semibold text-slate-800">Errors by Type</h4>
+      {/* Charts Grid */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Encounters Over Time */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">Encounter Timeline</h3>
+              <p className="text-xs text-slate-500">Monthly patient visit encounters</p>
+            </div>
+            <TrendingUp className="h-5 w-5 text-teal-600" />
+          </div>
           <div className="h-72">
-            {chartData.errors_by_type.length === 0 ? <p className="flex h-full items-center justify-center text-sm text-slate-500">No medical error records available.</p> : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData.errors_by_type}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {(!charts.encounters_over_time || charts.encounters_over_time.length === 0) ? (
+              <p className="flex h-full items-center justify-center text-xs text-slate-400">No encounter trend data available</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={charts.encounters_over_time}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0' }} />
+                  <Line type="monotone" dataKey="value" stroke="#0d9488" strokeWidth={3} dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h4 className="mb-4 text-lg font-semibold text-slate-800">Alerts by Severity</h4>
+        {/* Top Diagnosed Conditions */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">Top Diagnosed Conditions</h3>
+              <p className="text-xs text-slate-500">Most frequent active diagnoses</p>
+            </div>
+            <Activity className="h-5 w-5 text-indigo-600" />
+          </div>
           <div className="h-72">
-            {chartData.alerts_by_severity.length === 0 ? <p className="flex h-full items-center justify-center text-sm text-slate-500">No safety alert records available.</p> : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData.alerts_by_severity}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" fill="#f97316" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {(!charts.top_conditions || charts.top_conditions.length === 0) ? (
+              <p className="flex h-full items-center justify-center text-xs text-slate-400">No condition data available</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={charts.top_conditions} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis type="number" tick={{ fontSize: 11 }} />
+                  <YAxis dataKey="name" type="category" width={140} tick={{ fontSize: 10 }} />
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0' }} />
+                  <Bar dataKey="value" fill="#6366f1" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h4 className="mb-4 text-lg font-semibold text-slate-800">Prescriptions over Time</h4>
-          <div className="h-72">
-            {chartData.prescriptions_over_time.length === 0 ? <p className="flex h-full items-center justify-center text-sm text-slate-500">No prescription records available.</p> : (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData.prescriptions_over_time}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="value" stroke="#10b981" strokeWidth={3} />
-              </LineChart>
-            </ResponsiveContainer>
+        {/* Patient Gender Distribution */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="text-base font-bold text-slate-900 mb-1">Patient Demographics</h3>
+          <p className="text-xs text-slate-500 mb-4">Gender breakdown of registered patients</p>
+          <div className="h-64 flex items-center justify-center">
+            {(!charts.gender_distribution || charts.gender_distribution.length === 0) ? (
+              <p className="text-xs text-slate-400">No demographic data available</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={charts.gender_distribution}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {charts.gender_distribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h4 className="mb-4 text-lg font-semibold text-slate-800">User Activity</h4>
-          <div className="h-72">
-            {chartData.user_activity.length === 0 ? <p className="flex h-full items-center justify-center text-sm text-slate-500">No user activity available.</p> : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData.user_activity}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+        {/* Encounter Classification */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="text-base font-bold text-slate-900 mb-1">Encounter Classifications</h3>
+          <p className="text-xs text-slate-500 mb-4">Ambulatory, inpatient, and wellness care</p>
+          <div className="h-64">
+            {(!charts.encounter_types || charts.encounter_types.length === 0) ? (
+              <p className="flex h-full items-center justify-center text-xs text-slate-400">No encounter classification data</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={charts.encounter_types}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0' }} />
+                  <Bar dataKey="value" fill="#0284c7" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </div>
         </div>

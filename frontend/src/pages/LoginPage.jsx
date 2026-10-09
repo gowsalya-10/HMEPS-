@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Lock, LogIn, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
@@ -25,50 +26,59 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-900 px-4">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl">
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-xl font-bold text-white">H</div>
-          <h1 className="text-2xl font-bold text-slate-900">HMEPS Portal</h1>
-          <p className="mt-2 text-sm text-slate-500">Healthcare Medical Error Prevention System</p>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 px-4 py-8">
+      <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-md">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-lg shadow-teal-950/40">
+            <ShieldCheck className="h-8 w-8" />
+          </div>
+          <span className="text-xs uppercase tracking-widest text-teal-400 font-bold block mb-1">HMEPS Clinical HIS</span>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Healthcare Portal Access</h1>
+          <p className="mt-1 text-xs text-slate-400">Medical Error Prevention & EHR System</p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-5 text-xs" onSubmit={handleSubmit}>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+            <label className="mb-1.5 block font-semibold text-slate-300">Staff Email Address</label>
             <input
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
               required
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
+            <label className="mb-1.5 block font-semibold text-slate-300">Authorization Key / Password</label>
             <input
               type="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white placeholder-slate-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
               required
             />
           </div>
 
-          {error && <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          {error && (
+            <div className="rounded-xl border border-rose-900/60 bg-rose-950/60 px-4 py-3 text-xs font-semibold text-rose-300">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-3 font-bold text-white shadow-lg shadow-teal-950/50 transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:bg-teal-800"
           >
-            {loading ? 'Signing in...' : 'Login'}
+            <LogIn className="h-4 w-4" />
+            {loading ? 'Authenticating...' : 'Sign In to Portal'}
           </button>
         </form>
 
-        <div className="mt-6 rounded-xl bg-slate-100 p-3 text-xs text-slate-600">
-          Demo admin credentials: admin@hmeps.io / admin123
+        <div className="mt-8 rounded-xl border border-slate-800 bg-slate-800/40 p-3.5 text-center text-xs text-slate-400">
+          <p className="font-semibold text-slate-300">Demo Staff Credentials:</p>
+          <p className="mt-1 font-mono text-[11px] text-teal-400">admin@hmeps.io / admin123</p>
         </div>
       </div>
     </div>
