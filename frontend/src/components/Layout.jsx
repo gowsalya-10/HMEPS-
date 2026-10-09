@@ -67,6 +67,8 @@ const getNavGroups = (userRole) => {
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+  console.log("Layout user:", user);
+  console.log("Layout role:", user?.role);
   const location = useLocation();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
@@ -125,9 +127,8 @@ export default function Layout({ children }) {
     <div className="flex min-h-screen bg-slate-50 text-slate-900 font-sans">
       {/* Sidebar Desktop */}
       <aside
-        className={`hidden md:flex flex-col bg-slate-900 text-slate-100 transition-all duration-300 ${
-          collapsed ? 'w-20' : 'w-64'
-        } shrink-0 border-r border-slate-800`}
+        className={`hidden md:flex flex-col bg-slate-900 text-slate-100 transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'
+          } shrink-0 border-r border-slate-800`}
       >
         {/* Brand Header */}
         <div className="flex h-16 items-center justify-between px-4 border-b border-slate-800">
@@ -138,7 +139,9 @@ export default function Layout({ children }) {
             {!collapsed && (
               <div>
                 <span className="text-xs uppercase tracking-widest text-teal-400 font-semibold block">HMEPS</span>
-                <span className="text-sm font-bold text-white tracking-tight leading-tight block">Clinical HIS</span>
+                <span className="text-sm font-bold text-white tracking-tight leading-tight block">
+                  {user?.role === 'ADMIN' ? 'Admin Console' : 'Clinical HIS'}
+                </span>
               </div>
             )}
           </div>
@@ -166,10 +169,9 @@ export default function Layout({ children }) {
                     key={to}
                     to={to}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-                        isActive
-                          ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive
+                        ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                       }`
                     }
                     title={collapsed ? label : undefined}
@@ -211,7 +213,9 @@ export default function Layout({ children }) {
                 </div>
                 <div>
                   <span className="text-xs uppercase tracking-widest text-teal-400 font-semibold block">HMEPS</span>
-                  <span className="text-base font-bold text-white block">Clinical HIS</span>
+                  <span className="text-base font-bold text-white block">
+                    {user?.role === 'ADMIN' ? 'Admin Console' : 'Clinical HIS'}
+                  </span>
                 </div>
               </div>
               <button onClick={() => setMobileOpen(false)} className="text-slate-400 hover:text-white">
@@ -229,8 +233,7 @@ export default function Layout({ children }) {
                         to={to}
                         onClick={() => setMobileOpen(false)}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-                            isActive ? 'bg-teal-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                          `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive ? 'bg-teal-600 text-white' : 'text-slate-300 hover:bg-slate-800'
                           }`
                         }
                       >
@@ -260,7 +263,9 @@ export default function Layout({ children }) {
             </button>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Healthcare Management System</p>
-              <h1 className="text-lg font-bold text-slate-900 tracking-tight">HMEPS HIS Portal</h1>
+              <h1 className="text-lg font-bold text-slate-900 tracking-tight">
+                {user?.role === 'ADMIN' ? 'HMEPS Administration' : 'HMEPS Clinical Portal'}
+              </h1>
             </div>
           </div>
 
@@ -308,9 +313,8 @@ export default function Layout({ children }) {
                       {notifications.slice(0, 5).map((notif) => (
                         <div
                           key={notif.notification_id}
-                          className={`rounded-xl border p-3 text-xs transition ${
-                            notif.read ? 'border-slate-100 bg-slate-50 text-slate-600' : 'border-teal-200 bg-teal-50/50 text-slate-900 font-medium'
-                          }`}
+                          className={`rounded-xl border p-3 text-xs transition ${notif.read ? 'border-slate-100 bg-slate-50 text-slate-600' : 'border-teal-200 bg-teal-50/50 text-slate-900 font-medium'
+                            }`}
                         >
                           <p>{notif.message}</p>
                           <div className="mt-2 flex items-center justify-between">

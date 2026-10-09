@@ -13,7 +13,6 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import ReportsPage from './pages/ReportsPage';
 
 // Patient EHR Pages
-import PatientDashboard from './pages/Dashboard';
 import PatientList from './pages/PatientList';
 import PatientForm from './pages/PatientForm';
 import PatientProfile from './pages/PatientProfile';
@@ -99,16 +98,6 @@ export default function App() {
       />
 
       {/* Patient EHR Routes */}
-      <Route
-        path="/patient-dashboard"
-        element={
-          <ProtectedRoute allowedRoles={allRoles}>
-            <Layout>
-              <PatientDashboard />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
       <Route
         path="/patients"
         element={
