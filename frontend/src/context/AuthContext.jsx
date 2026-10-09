@@ -3,6 +3,14 @@ import api from '../services/api';
 
 const AuthContext = createContext(null);
 
+const normalizeUser = (userData) => {
+  if (!userData) return null;
+  return {
+    ...userData,
+    role: userData.role ? userData.role.toUpperCase() : 'UNKNOWN',
+  };
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,7 +25,7 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await api.get('/auth/me');
-      setUser(response.data.user);
+      setUser(normalizeUser(response.data.user));
       return true;
     } catch (error) {
       localStorage.removeItem('hmeps_token');
@@ -36,7 +44,7 @@ export function AuthProvider({ children }) {
     const response = await api.post('/auth/login', { email, password });
     const token = response.data.token;
     localStorage.setItem('hmeps_token', token);
-    setUser(response.data.user);
+    setUser(normalizeUser(response.data.user));
     return response.data;
   };
 

@@ -54,13 +54,16 @@ def require_auth(func):
 
 
 def require_roles(*roles):
+    normalized_roles = [r.lower() for r in roles]
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             user = getattr(g, "current_user", None)
             if not user:
                 return jsonify({"success": False, "message": "Authentication required"}), 401
-            if user.get("role") not in roles:
+            
+            user_role = user.get("role")
+            if not user_role or user_role.lower() not in normalized_roles:
                 return jsonify({"success": False, "message": "Forbidden: insufficient permissions"}), 403
             return func(*args, **kwargs)
 

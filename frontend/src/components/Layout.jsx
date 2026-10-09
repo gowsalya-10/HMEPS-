@@ -20,36 +20,50 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-const navGroups = [
-  {
-    title: 'Overview',
-    items: [
-      { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    ],
-  },
-  {
-    title: 'Clinical',
-    items: [
-      { to: '/patients', label: 'Patient Registry', icon: Users },
-      { to: '/appointments', label: 'Appointments', icon: CalendarDays },
-    ],
-  },
-  {
-    title: 'Administration',
-    items: [
-      { to: '/users', label: 'User Accounts', icon: Users },
-      { to: '/audit-logs', label: 'Audit Trail', icon: ClipboardList },
-      { to: '/notifications', label: 'Notifications', icon: Bell },
-    ],
-  },
-  {
-    title: 'Insights',
-    items: [
-      { to: '/analytics', label: 'Safety Analytics', icon: BriefcaseMedical },
-      { to: '/reports', label: 'Medical Reports', icon: FileText },
-    ],
-  },
-];
+const ALL_ROLES = ['ADMIN', 'DOCTOR', 'NURSE', 'PHARMACIST'];
+const ADMIN_ONLY = ['ADMIN'];
+
+const getNavGroups = (userRole) => {
+  if (!userRole || userRole === 'UNKNOWN') return [];
+
+  const groups = [
+    {
+      title: 'Overview',
+      items: [
+        { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ALL_ROLES },
+      ],
+    },
+    {
+      title: 'Clinical',
+      items: [
+        { to: '/patients', label: 'Patient Registry', icon: Users, roles: ALL_ROLES },
+        { to: '/appointments', label: 'Appointments', icon: CalendarDays, roles: ALL_ROLES },
+      ],
+    },
+    {
+      title: 'Administration',
+      items: [
+        { to: '/users', label: 'User Accounts', icon: Users, roles: ADMIN_ONLY },
+        { to: '/audit-logs', label: 'Audit Trail', icon: ClipboardList, roles: ADMIN_ONLY },
+        { to: '/notifications', label: 'Notifications', icon: Bell, roles: ALL_ROLES },
+      ],
+    },
+    {
+      title: 'Insights',
+      items: [
+        { to: '/analytics', label: 'Safety Analytics', icon: BriefcaseMedical, roles: ALL_ROLES },
+        { to: '/reports', label: 'Medical Reports', icon: FileText, roles: ADMIN_ONLY },
+      ],
+    },
+  ];
+
+  return groups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => item.roles.includes(userRole))
+    }))
+    .filter(group => group.items.length > 0);
+};
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
@@ -60,6 +74,8 @@ export default function Layout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
+
+  const filteredNavGroups = getNavGroups(user?.role);
 
   useEffect(() => {
     let active = true;
@@ -137,7 +153,7 @@ export default function Layout({ children }) {
 
         {/* Navigation Items */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-          {navGroups.map((group, idx) => (
+          {filteredNavGroups.map((group, idx) => (
             <div key={idx}>
               {!collapsed && (
                 <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
@@ -203,7 +219,7 @@ export default function Layout({ children }) {
               </button>
             </div>
             <nav className="flex-1 space-y-4 overflow-y-auto">
-              {navGroups.map((group, idx) => (
+              {filteredNavGroups.map((group, idx) => (
                 <div key={idx}>
                   <p className="px-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">{group.title}</p>
                   <div className="space-y-1">

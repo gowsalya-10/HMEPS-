@@ -14,6 +14,9 @@ export default function ProtectedRoute({ allowedRoles, children }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
+    if (location.pathname === '/dashboard' || user.role === 'UNKNOWN') {
+      return <Navigate to="/login" replace state={{ from: location }} />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 
