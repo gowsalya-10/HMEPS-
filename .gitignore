@@ -1,4 +1,27 @@
+# Python
+backend/venv/
+backend/.venv/
+venv/
+.venv/
 __pycache__/
+**/__pycache__/
 *.py[cod]
-__pycache__/
-*.py[cod]
+*.pyc
+*.pyo
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+node_modules/
+dist/
+
+# Environment
+.env
+.env.local
+backend/.env
+frontend/.env
+
+# OS
+.DS_Store
+Thumbs.db

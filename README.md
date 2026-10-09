@@ -1,115 +1,140 @@
-# Healthcare Medical Error Prevention System (HMEPS) - Module 1
+# Healthcare Medical Error Prevention System (HMEPS)
 
-This is **Module 1 (Patient & Electronic Health Record)** of the HMEPS system. It handles patient registration, profiles, vital signs, lab reports, EHR history, and appointments.
+HMEPS is a comprehensive healthcare platform integrating **Patient Electronic Health Records (EHR)** and **Administration, Security, Audit, Notifications, Analytics, and Reporting (Module 3)**.
+
+## System Overview
+
+- **Patient EHR & Clinical Management**: Patient registration, medical records, vital signs, lab reports, and appointments management.
+- **Administration & Security**: Authentication, role-based access control (RBAC), user management, audit logging, system monitoring, and safety analytics.
 
 ## Tech Stack
-- **Frontend**: React, Vite, Tailwind CSS, React Router, Axios, Lucide React
-- **Backend**: Python, Flask, Flask-CORS, PyMongo
-- **Database**: MongoDB
-- **Architecture**: REST API with separate Frontend/Backend
 
-## Folder Structure
-```
+- **Frontend**: React 18, Vite, Tailwind CSS, React Router v6, Axios, Lucide React, Recharts
+- **Backend**: Python 3.10+, Flask, PyMongo, PyJWT, Werkzeug
+- **Database**: MongoDB (with fallback in-memory database support for development/testing)
+- **Architecture**: Modular REST API with JWT authentication middleware
+
+## Directory Structure
+
+```text
 HMEPS/
 ├── backend/
-│   ├── app.py              # Flask app entry point & server config
-│   ├── config.py           # Environment config (MongoDB URI, JWT secret)
-│   ├── db.py               # MongoDB connection handling
-│   ├── routes.py           # REST API endpoints implementation
-│   └── requirements.txt    # Python dependencies
+│   ├── app/
+│   │   ├── analytics/        # Analytics API endpoints
+│   │   ├── audit/            # Audit logging endpoints
+│   │   ├── auth/             # Authentication endpoints
+│   │   ├── middleware/       # Auth & JWT verification middleware
+│   │   ├── monitoring/       # System health & monitoring
+│   │   ├── notifications/    # User notification services
+│   │   ├── reports/          # Medical error & alert reports
+│   │   ├── users/            # User administration routes
+│   │   ├── __init__.py       # App factory & Blueprint registration
+│   │   ├── config.py         # App configuration
+│   │   ├── database.py       # MongoDB & fallback database handling
+│   │   └── utils.py          # Shared helpers & audit logger
+│   ├── requirements.txt      # Backend Python dependencies
+│   ├── run.py                # Server entry point
+│   └── test_module3.py       # Module test suite
 └── frontend/
-    ├── package.json        # Node dependencies & scripts
-    ├── tailwind.config.js  # Tailwind styling configuration
-    ├── index.html          # Vite HTML entry point
-    └── src/
-        ├── api.js          # Axios configuration for backend communication
-        ├── App.jsx         # React Router setup
-        ├── main.jsx        # React DOM rendering
-        ├── index.css       # Global CSS & Tailwind imports
-        ├── components/     # Reusable UI components (Sidebar, Layout, TopNav)
-        └── pages/          # Full-page components (Dashboard, PatientList, etc.)
+    ├── src/
+    │   ├── components/       # Layout, Navigation, and reusable components
+    │   ├── context/          # AuthContext for state management
+    │   ├── pages/            # Application views (Dashboard, Patient Management, Analytics, etc.)
+    │   ├── routes/           # ProtectedRoute component
+    │   ├── services/         # API client setup
+    │   ├── App.jsx           # Main routing & application layout
+    │   ├── main.jsx          # React entry point
+    │   └── index.css         # Global Tailwind & base styling
+    ├── index.html
+    ├── package.json
+    ├── postcss.config.js
+    ├── tailwind.config.js
+    └── vite.config.js
 ```
 
-## MongoDB Schema Details
-This module uses a schema-less NoSQL structure but enforces the following document shapes in code:
+## Database Schema & Collections
 
-**`patients` Collection:**
-- `patient_id` (String, Unique): e.g., "PT-001"
-- `full_name` (String)
-- `dob` (Date String)
-- `gender` (String)
-- `phone` (String)
-- `email` (String)
-- `address` (String)
-- `blood_group` (String)
-- `emergency_contact` (String)
-- `known_allergies` (String)
-- `existing_conditions` (String)
-- `created_at` (Datetime)
+### Core Collections
+- **`patients`**: Patient demographics, contact info, blood group, known allergies, and medical conditions.
+- **`medical_records`**: Electronic Health Record notes and clinical history.
+- **`vital_signs`**: Temperature, blood pressure, heart rate, oxygen saturation, and weight entries.
+- **`lab_reports`**: Diagnostic tests, results, reference ranges, and doctor notes.
+- **`appointments`**: Doctor schedules, patient appointments, and visit statuses.
 
-**`medical_records` Collection:**
-- `patient_objectId` (String): Reference to Patient _id
-- `doctor_id` (String)
-- `record_type` (String)
-- `description` (String)
-- `created_at` (Datetime)
+### Administration & Security Collections
+- **`users`**: User accounts, credentials (hashed), roles (`ADMIN`, `DOCTOR`, `NURSE`, `PHARMACIST`), and status.
+- **`audit_logs`**: System audit trails for access, security events, and record modifications.
+- **`notifications`**: User-specific alerts and system notifications.
+- **`safety_alerts` & `medical_errors`**: Safety monitoring and medical error prevention data.
 
-**`vital_signs` Collection:**
-- `patient_objectId` (String)
-- `temperature`, `blood_pressure`, `heart_rate`, `respiratory_rate`, `oxygen_saturation`, `weight`
-- `date` (Datetime)
+## Key API Endpoints
 
-**`lab_reports` Collection:**
-- `patient_objectId` (String)
-- `test_name`, `result`, `reference_range`, `status`, `doctor_notes`
-- `date` (Datetime)
+### Authentication & Users
+- `POST /api/auth/login` - Authenticate user & issue JWT
+- `GET /api/auth/me` - Get current user profile
+- `GET/POST /api/users` - User management (Admin)
+- `PUT/DELETE /api/users/<id>` - Update/disable user accounts
 
-**`appointments` Collection:**
-- `patient_id` (String)
-- `doctor_id` (String)
-- `date` (Date String)
-- `time` (Time String)
-- `reason` (String)
-- `status` (String: "Scheduled", "Completed", "Cancelled")
-
-## REST API Endpoints
-All endpoints are prefixed with `/api`.
-- `GET /api/patients` - List all patients (supports `?search=query`)
-- `POST /api/patients` - Register a new patient
-- `GET /api/patients/<id>` - Get patient details
-- `PUT /api/patients/<id>` - Update patient details
-- `DELETE /api/patients/<id>` - Delete a patient
+### Patient & EHR Management
+- `GET/POST /api/patients` - List and register patients
+- `GET/PUT/DELETE /api/patients/<id>` - Patient profile management
 - `GET/POST /api/patients/<id>/records` - EHR records
 - `GET/POST /api/patients/<id>/vitals` - Vital signs
 - `GET/POST /api/patients/<id>/labs` - Lab reports
-- `GET/POST /api/appointments` - Appointments
-- `PUT/DELETE /api/appointments/<id>` - Manage specific appointment
+- `GET/POST /api/appointments` - Appointment scheduling
 
-*(Note: JWT Authentication is assumed to be implemented at an API Gateway/Middleware level in the shared project structure, utilizing `Config.SECRET_KEY`.)*
+### Audit, Analytics & Reports
+- `GET /api/audit-logs` - System audit log viewer
+- `GET /api/notifications` - User notifications
+- `GET /api/analytics/overview` - Medical error & safety analytics
+- `GET /api/reports/errors` - Exportable safety reports
+- `GET /api/health` - System health check
 
-## How to Run
+## Setup & Running Locally
 
-### 1. Start MongoDB
-Ensure you have MongoDB running locally on `mongodb://localhost:27017` or update the `MONGO_URI` in `backend/config.py` (or `.env`).
+### Environment Setup
 
-### 2. Run the Backend
+Create `.env` in `backend/`:
+```env
+SECRET_KEY=hmeps_super_secret_key
+JWT_SECRET=hmeps_jwt_secret_key
+MONGODB_URI=mongodb://localhost:27017/hmeps
+MONGO_DB_NAME=hmeps
+CORS_ORIGINS=http://localhost:5173
+```
+
+### Start Backend
+
 ```bash
 cd backend
-python -m venv venv
-source venv/Scripts/activate  # (Windows)
+python -m venv .venv
+.venv\Scripts\activate  # Windows (or source .venv/bin/activate on Linux/macOS)
 pip install -r requirements.txt
-python app.py
+python run.py
 ```
-*Backend will run on `http://localhost:5000`*
 
-### 3. Run the Frontend
+*Backend runs on `http://localhost:5000`.*
+
+### Start Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-*Frontend will run on the Vite default port (usually `http://localhost:5173`)*
 
-## Team Integration Notes
-- **To Team Member 2 (Prescriptions)**: When you need to verify patient allergies, query `GET /api/patients/<id>` and check the `known_allergies` field. Add your prescription models as a separate collection.
-- **To Team Member 3 (Admin/Security)**: You can enforce role-based access control (RBAC) in the `routes.py` before returning data, or wrap our Blueprints in your custom decorators.
+*Frontend runs on `http://localhost:5173`.*
+
+## Build & Testing
+
+### Frontend Production Build
+```bash
+cd frontend
+npm run build
+```
+
+### Backend Tests
+```bash
+cd backend
+python test_module3.py
+```
